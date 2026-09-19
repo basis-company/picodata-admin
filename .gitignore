@@ -1,0 +1,5 @@
+vendor/
+node_modules/
+var/*.php
+public/assets/
+ui/dist/

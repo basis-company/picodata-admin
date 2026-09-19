@@ -1,0 +1,76 @@
+{
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
+        "This file is @generated automatically"
+    ],
+    "content-hash": "be9990641d812964bb0af15199db4c39",
+    "packages": [
+        {
+            "name": "basis-company/picodata",
+            "version": "0.0.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/basis-company/picodata.php.git",
+                "reference": "7e16c67f30d8d4d2b1e776af953ee93dc7323b5d"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/basis-company/picodata.php/zipball/7e16c67f30d8d4d2b1e776af953ee93dc7323b5d",
+                "reference": "7e16c67f30d8d4d2b1e776af953ee93dc7323b5d",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.4"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "^3.95",
+                "phpunit/phpunit": "^13.2"
+            },
+            "suggest": {
+                "ext-pgsql": "PostgreSQL wire transport to the Picodata pg endpoint"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Basis\\Picodata\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "dmitry krokhin",
+                    "email": "nekufa@gmail.com"
+                }
+            ],
+            "description": "Picodata client for PHP: schema management, typed entities, SQL builder",
+            "keywords": [
+                "database",
+                "distributed",
+                "orm",
+                "picodata",
+                "sharding",
+                "sql"
+            ],
+            "support": {
+                "issues": "https://github.com/basis-company/picodata.php/issues",
+                "source": "https://github.com/basis-company/picodata.php/tree/0.0.1"
+            },
+            "time": "2026-09-18T15:28:24+00:00"
+        }
+    ],
+    "packages-dev": [],
+    "aliases": [],
+    "minimum-stability": "stable",
+    "stability-flags": {},
+    "prefer-stable": false,
+    "prefer-lowest": false,
+    "platform": {
+        "php": "^8.4"
+    },
+    "platform-dev": {},
+    "plugin-api-version": "2.9.0"
+}

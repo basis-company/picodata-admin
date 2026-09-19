@@ -1,0 +1,48 @@
+services:
+  admin:
+    restart: always
+    build:
+      context: .
+    ports:
+      - "8888:80"
+    volumes:
+      - ./php:/var/www/html/php
+      - ./public/assets:/var/www/html/public/assets
+    environment:
+      - PICODATA_CONNECTIONS=postgres://admin:T0psecret@picodata-1-1:5432
+    depends_on:
+      - picodata-1-1
+
+  picodata-1-1:
+    image: ${REGISTRY:-docker-public.binary.picodata.io}/picodata:${PICODATA_VERSION:-26.1}
+    hostname: picodata-1-1
+    command:
+      - run
+      - -c
+      - cluster.name=picodata_admin
+      - -c
+      - cluster.tier={"default":{"replication_factor":1,"bucket_count":3000}}
+    environment:
+      PICODATA_PEER: picodata-1-1:3301
+      PICODATA_LISTEN: picodata-1-1:3301
+      PICODATA_ADVERTISE: picodata-1-1:3301
+      PICODATA_INSTANCE_DIR: /var/lib/picodata
+      PICODATA_INSTANCE_TIER: default
+      PICODATA_FAILURE_DOMAIN: HOST=picodata-1
+      PICODATA_INIT_REPLICATION_FACTOR: 1
+      PICODATA_HTTP_LISTEN: picodata-1-1:8001
+      PICODATA_PG_LISTEN: picodata-1-1:5432
+      PICODATA_ADMIN_PASSWORD: T0psecret
+      PICODATA_LOG_LEVEL: info
+    ports:
+      - "127.0.0.1:5432:5432"
+    volumes:
+      - picodata-1-1-data:/var/lib/picodata
+    healthcheck:
+      test: ["CMD-SHELL", "echo \"SELECT current_state FROM _pico_instance;\" | picodata admin /var/lib/picodata/admin.sock 2>/dev/null | grep -q Online"]
+      interval: 5s
+      timeout: 5s
+      retries: 60
+
+volumes:
+  picodata-1-1-data:
