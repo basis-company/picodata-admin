@@ -87,13 +87,14 @@ export function DataTab({
           </div>
         )}
       </div>
-      <div className="min-h-0 flex-1 overflow-auto border-t">
+      <div className="min-h-0 flex-1 overflow-auto p-4">
         {!q.loading && rows.length === 0 && !q.error && (
-          <div className="p-4 text-muted-foreground">No rows.</div>
+          <div className="panel px-4 py-6 text-center text-muted-foreground">No rows.</div>
         )}
         {rows.length > 0 && (
+          <div className="panel overflow-hidden">
           <Table>
-            <TableHeader className="sticky top-0 z-10 bg-background">
+            <TableHeader className="sticky top-0 z-10 bg-muted">
               <TableRow>
                 {columns.map((c) => (
                   <TableHead key={c} className="h-8 px-2 text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
@@ -109,7 +110,7 @@ export function DataTab({
                   {columns.map((c) => (
                     <TableCell key={c} className="px-2 py-1">
                       {row[c] === null ? (
-                        <span className="data-cell italic text-muted-foreground">NULL</span>
+                        <span className="data-cell italic text-muted-foreground">—</span>
                       ) : (
                         <span className="data-cell">{row[c]}</span>
                       )}
@@ -126,6 +127,7 @@ export function DataTab({
               ))}
             </TableBody>
           </Table>
+          </div>
         )}
       </div>
       <div className="flex items-center gap-2 border-t px-4 py-1.5 text-muted-foreground">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { PlusIcon, Trash2Icon } from 'lucide-react'
+import { CheckIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -20,14 +20,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { StickyHead, Th } from '@/components/tableBits'
 import { ConfirmTypeNameDialog } from '@/components/ConfirmTypeNameDialog'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { api } from '@/lib/api'
@@ -61,20 +55,20 @@ export function SchemaTab({
   }
 
   return (
-    <div className="max-w-4xl space-y-6 p-4">
+    <div className="w-full space-y-6 p-4">
       {error && <ErrorAlert message={error} />}
       <section className="space-y-2">
-        <h3 className="text-[13px] font-medium text-muted-foreground">Columns</h3>
-        <div className="rounded-md border">
+        <h3 className="text-xs font-medium text-muted-foreground">Columns</h3>
+        <div className="panel overflow-hidden">
           <Table>
-            <TableHeader>
+            <StickyHead>
               <TableRow>
-                <TableHead className="h-8 px-2">Name</TableHead>
-                <TableHead className="h-8 px-2">Type</TableHead>
-                <TableHead className="h-8 px-2">Flags</TableHead>
-                <TableHead className="h-8 px-2">Default</TableHead>
+                <Th>Name</Th>
+                <Th>Type</Th>
+                <Th>Flags</Th>
+                <Th>Default</Th>
               </TableRow>
-            </TableHeader>
+            </StickyHead>
             <TableBody>
               {space.columns.map((c) => (
                 <TableRow key={c.name}>
@@ -100,31 +94,37 @@ export function SchemaTab({
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
-          <h3 className="text-[13px] font-medium text-muted-foreground">Indexes</h3>
+          <h3 className="text-xs font-medium text-muted-foreground">Indexes</h3>
           {!readOnly && (
             <Button size="sm" variant="outline" onClick={() => setIndexOpen(true)}>
               <PlusIcon /> Add index
             </Button>
           )}
         </div>
-        <div className="rounded-md border">
+        <div className="panel overflow-hidden">
           <Table>
-            <TableHeader>
+            <StickyHead>
               <TableRow>
-                <TableHead className="h-8 px-2">Name</TableHead>
-                <TableHead className="h-8 px-2">Columns</TableHead>
-                <TableHead className="h-8 px-2">Using</TableHead>
-                <TableHead className="h-8 px-2">Unique</TableHead>
-                {!readOnly && <TableHead className="h-8 w-9 px-1" />}
+                <Th>Name</Th>
+                <Th>Columns</Th>
+                <Th>Using</Th>
+                <Th>Unique</Th>
+                {!readOnly && <Th className="h-8 w-9 px-1" />}
               </TableRow>
-            </TableHeader>
+            </StickyHead>
             <TableBody>
               {space.indexes.map((i) => (
                 <TableRow key={i.name}>
                   <TableCell className="px-2 py-1 font-mono">{i.name}</TableCell>
                   <TableCell className="px-2 py-1 font-mono">[{i.columns.join(', ')}]</TableCell>
                   <TableCell className="px-2 py-1">{i.using}</TableCell>
-                  <TableCell className="px-2 py-1">{i.unique ? 'yes' : 'no'}</TableCell>
+                  <TableCell className="px-2 py-1">
+                    {i.unique ? (
+                      <CheckIcon className="size-3.5 text-green-600" />
+                    ) : (
+                      <span className="text-muted-foreground">—</span>
+                    )}
+                  </TableCell>
                   {!readOnly && (
                     <TableCell className="px-1 py-1">
                       <Button
@@ -153,8 +153,8 @@ export function SchemaTab({
       </section>
 
       {!readOnly && (
-        <section className="rounded-md border border-destructive/40">
-          <div className="border-b bg-destructive/5 px-3 py-1.5 text-[13px] font-medium text-destructive">
+        <section className="panel border-destructive/40">
+          <div className="border-b bg-destructive/5 px-3 py-1.5 text-xs font-medium text-destructive">
             Danger zone
           </div>
           <div className="flex items-center gap-2 p-3">

@@ -1,14 +1,8 @@
-import { RefreshCwIcon } from 'lucide-react'
-import { Badge } from '@/components/ui/badge'
+import { CheckIcon, RefreshCwIcon } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table'
+import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
+import { StickyHead, Th } from '@/components/tableBits'
+import { DotBadge } from '@/components/DotBadge'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { api } from '@/lib/api'
 import { useAsync } from '@/lib/hooks'
@@ -26,13 +20,23 @@ function stateLabel(raw: string | undefined): string {
   return raw
 }
 
+function stateTone(label: string): 'good' | 'bad' | 'neutral' {
+  if (/online|ready|active|running/i.test(label)) return 'good'
+  if (/fail|error|down|unavailable|dropped|orphan/i.test(label)) return 'bad'
+  return 'neutral'
+}
+
+function StateCell({ raw }: { raw: string | undefined }) {
+  const label = stateLabel(raw)
+  if (label === '—') return <span className="text-muted-foreground">—</span>
+  return <DotBadge tone={stateTone(label)}>{label}</DotBadge>
+}
+
 function YesNo({ value }: { value: boolean | undefined }) {
   return value ? (
-    <Badge variant="secondary" className="font-normal">
-      yes
-    </Badge>
+    <CheckIcon className="size-3.5 text-green-600" />
   ) : (
-    <span className="text-muted-foreground">no</span>
+    <span className="text-muted-foreground">—</span>
   )
 }
 
@@ -52,9 +56,9 @@ export function InfoView() {
   }
 
   return (
-    <div className="mx-auto max-w-5xl space-y-6 p-4">
+    <div className="w-full space-y-6 p-4">
       <div className="flex flex-wrap items-center gap-3">
-        <h2 className="font-medium tabular-nums">
+        <h2 className="text-sm font-medium tabular-nums">
           Picodata {info.version ?? 'unknown'}
           {info.tables !== undefined && (
             <span className="text-muted-foreground"> · {info.tables} tables</span>
@@ -67,13 +71,13 @@ export function InfoView() {
 
       {info.properties && Object.keys(info.properties).length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-[13px] font-medium text-muted-foreground">Properties</h3>
-          <div className="w-fit min-w-72 rounded-md border">
+          <h3 className="text-xs font-medium text-muted-foreground">Properties</h3>
+          <div className="panel overflow-hidden">
             <Table>
               <TableBody>
                 {Object.entries(info.properties).map(([k, v]) => (
                   <TableRow key={k}>
-                    <TableCell className="w-56 px-2 py-1 text-muted-foreground">{k}</TableCell>
+                    <TableCell className="w-64 px-2 py-1 text-muted-foreground">{k}</TableCell>
                     <TableCell className="data-cell px-2 py-1">{v}</TableCell>
                   </TableRow>
                 ))}
@@ -85,30 +89,34 @@ export function InfoView() {
 
       {info.instances && info.instances.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-[13px] font-medium text-muted-foreground">
+          <h3 className="text-xs font-medium text-muted-foreground">
             Instances ({info.instances.length})
           </h3>
-          <div className="rounded-md border">
+          <div className="panel overflow-hidden">
             <Table>
-              <TableHeader>
+              <StickyHead>
                 <TableRow>
-                  <TableHead className="h-8 px-2">Name</TableHead>
-                  <TableHead className="h-8 px-2">Tier</TableHead>
-                  <TableHead className="h-8 px-2">Replicaset</TableHead>
-                  <TableHead className="h-8 px-2">State</TableHead>
-                  <TableHead className="h-8 px-2">Target</TableHead>
-                  <TableHead className="h-8 px-2">Version</TableHead>
-                  <TableHead className="h-8 px-2">Failure domain</TableHead>
+                  <Th>Name</Th>
+                  <Th>Tier</Th>
+                  <Th>Replicaset</Th>
+                  <Th>State</Th>
+                  <Th>Target</Th>
+                  <Th>Version</Th>
+                  <Th>Failure domain</Th>
                 </TableRow>
-              </TableHeader>
+              </StickyHead>
               <TableBody>
                 {info.instances.map((i) => (
                   <TableRow key={i.name}>
-                    <TableCell className="px-2 py-1 font-mono">{i.name}</TableCell>
+                    <TableCell className="px-2 py-1">{i.name}</TableCell>
                     <TableCell className="px-2 py-1">{i.tier}</TableCell>
                     <TableCell className="px-2 py-1">{i.replicaset_name}</TableCell>
-                    <TableCell className="px-2 py-1">{stateLabel(i.current_state)}</TableCell>
-                    <TableCell className="px-2 py-1">{stateLabel(i.target_state)}</TableCell>
+                    <TableCell className="px-2 py-1">
+                      <StateCell raw={i.current_state} />
+                    </TableCell>
+                    <TableCell className="px-2 py-1">
+                      <StateCell raw={i.target_state} />
+                    </TableCell>
                     <TableCell className="data-cell px-2 py-1">{i.picodata_version}</TableCell>
                     <TableCell className="px-2 py-1">{i.failure_domain}</TableCell>
                   </TableRow>
@@ -121,25 +129,29 @@ export function InfoView() {
 
       {info.tiers && info.tiers.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-[13px] font-medium text-muted-foreground">Tiers ({info.tiers.length})</h3>
-          <div className="rounded-md border">
+          <h3 className="text-xs font-medium text-muted-foreground">Tiers ({info.tiers.length})</h3>
+          <div className="panel overflow-hidden">
             <Table>
-              <TableHeader>
+              <StickyHead>
                 <TableRow>
-                  <TableHead className="h-8 px-2">Name</TableHead>
-                  <TableHead className="h-8 px-2">Replication factor</TableHead>
-                  <TableHead className="h-8 px-2">Bucket count</TableHead>
-                  <TableHead className="h-8 px-2">Default</TableHead>
-                  <TableHead className="h-8 px-2">Can vote</TableHead>
-                  <TableHead className="h-8 px-2">Bootstrapped</TableHead>
+                  <Th>Name</Th>
+                  <Th className="text-right">Replication factor</Th>
+                  <Th className="text-right">Bucket count</Th>
+                  <Th>Default</Th>
+                  <Th>Can vote</Th>
+                  <Th>Bootstrapped</Th>
                 </TableRow>
-              </TableHeader>
+              </StickyHead>
               <TableBody>
                 {info.tiers.map((t) => (
                   <TableRow key={t.name}>
-                    <TableCell className="px-2 py-1 font-mono">{t.name}</TableCell>
-                    <TableCell className="px-2 py-1 tabular-nums">{t.replication_factor}</TableCell>
-                    <TableCell className="px-2 py-1 tabular-nums">{t.bucket_count}</TableCell>
+                    <TableCell className="px-2 py-1">{t.name}</TableCell>
+                    <TableCell className="px-2 py-1 text-right tabular-nums">
+                      {t.replication_factor}
+                    </TableCell>
+                    <TableCell className="px-2 py-1 text-right tabular-nums">
+                      {t.bucket_count}
+                    </TableCell>
                     <TableCell className="px-2 py-1">
                       <YesNo value={t.is_default} />
                     </TableCell>
@@ -159,26 +171,28 @@ export function InfoView() {
 
       {info.replicasets && info.replicasets.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-[13px] font-medium text-muted-foreground">
+          <h3 className="text-xs font-medium text-muted-foreground">
             Replicasets ({info.replicasets.length})
           </h3>
-          <div className="rounded-md border">
+          <div className="panel overflow-hidden">
             <Table>
-              <TableHeader>
+              <StickyHead>
                 <TableRow>
-                  <TableHead className="h-8 px-2">Name</TableHead>
-                  <TableHead className="h-8 px-2">Tier</TableHead>
-                  <TableHead className="h-8 px-2">Master</TableHead>
-                  <TableHead className="h-8 px-2">State</TableHead>
+                  <Th>Name</Th>
+                  <Th>Tier</Th>
+                  <Th>Master</Th>
+                  <Th>State</Th>
                 </TableRow>
-              </TableHeader>
+              </StickyHead>
               <TableBody>
                 {info.replicasets.map((r) => (
                   <TableRow key={r.name}>
-                    <TableCell className="px-2 py-1 font-mono">{r.name}</TableCell>
+                    <TableCell className="px-2 py-1">{r.name}</TableCell>
                     <TableCell className="px-2 py-1">{r.tier}</TableCell>
                     <TableCell className="px-2 py-1">{r.current_master_name}</TableCell>
-                    <TableCell className="px-2 py-1">{stateLabel(r.state)}</TableCell>
+                    <TableCell className="px-2 py-1">
+                      <StateCell raw={r.state} />
+                    </TableCell>
                   </TableRow>
                 ))}
               </TableBody>
@@ -189,24 +203,22 @@ export function InfoView() {
 
       {info.buckets && info.buckets.length > 0 && (
         <section className="space-y-2">
-          <h3 className="text-[13px] font-medium text-muted-foreground">Buckets</h3>
-          <div className="w-fit min-w-64 rounded-md border">
+          <h3 className="text-xs font-medium text-muted-foreground">Buckets</h3>
+          <div className="panel overflow-hidden">
             <Table>
-              <TableHeader>
+              <StickyHead>
                 <TableRow>
-                  <TableHead className="h-8 px-2">State</TableHead>
-                  <TableHead className="h-8 px-2">Count</TableHead>
+                  <Th>State</Th>
+                  <Th className="text-right">Count</Th>
                 </TableRow>
-              </TableHeader>
+              </StickyHead>
               <TableBody>
                 {info.buckets.map((b) => (
                   <TableRow key={b.state}>
                     <TableCell className="px-2 py-1">
-                      <Badge variant="outline" className="font-normal">
-                        {b.state}
-                      </Badge>
+                      <DotBadge tone={stateTone(b.state)}>{b.state}</DotBadge>
                     </TableCell>
-                    <TableCell className="px-2 py-1 tabular-nums">{b.count}</TableCell>
+                    <TableCell className="px-2 py-1 text-right tabular-nums">{b.count}</TableCell>
                   </TableRow>
                 ))}
               </TableBody>

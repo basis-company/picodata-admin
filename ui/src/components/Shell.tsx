@@ -70,7 +70,7 @@ export function Shell({
 
   return (
     <div className="flex h-full min-h-0">
-      <aside className="flex w-60 shrink-0 flex-col border-r">
+      <aside className="flex w-60 shrink-0 flex-col border-r bg-card">
         <div className="truncate border-b px-3 py-2 font-medium" title={conn.dsn}>
           {conn.title}
         </div>

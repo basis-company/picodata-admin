@@ -65,12 +65,13 @@ export function HomeView({
   }
 
   return (
-    <div className="mx-auto w-full max-w-2xl px-4 py-8">
+    <div className="w-full px-6 py-6">
       <div className="mb-4 flex items-baseline justify-between">
-        <h1 className="text-base font-semibold">Picodata Admin</h1>
-        {config && (
+        <h1 className="text-sm font-semibold">Picodata Admin</h1>
+        {config && config.version.sha && config.version.sha !== 'unknown' && (
           <span className="text-muted-foreground">
-            v{config.version.tag} ({config.version.sha})
+            {config.version.tag && config.version.tag !== 'unknown' ? `v${config.version.tag} ` : ''}
+            ({config.version.short_sha})
             {config.latest && ` — update available: ${config.latest}`}
           </span>
         )}
@@ -81,7 +82,7 @@ export function HomeView({
         </div>
       )}
       <div className="mb-2 flex items-center justify-between">
-        <h2 className="text-[13px] font-medium text-muted-foreground">Connections</h2>
+        <h2 className="text-xs font-medium text-muted-foreground">Connections</h2>
         {!editorHidden && (
           <Button size="sm" variant="outline" onClick={() => setEditing('new')}>
             <PlusIcon /> Add connection
@@ -89,11 +90,11 @@ export function HomeView({
         )}
       </div>
       {rows.length === 0 ? (
-        <div className="rounded-md border px-3 py-6 text-center text-muted-foreground">
+        <div className="panel px-3 py-6 text-center text-muted-foreground">
           No connections. Add one to get started.
         </div>
       ) : (
-        <div className="divide-y rounded-md border">
+        <div className="panel divide-y divide-border">
           {rows.map((c) => (
             <div key={c.id} className="flex items-center gap-3 px-3 py-2">
               <DatabaseIcon className="size-4 shrink-0 text-muted-foreground" />

@@ -2,7 +2,7 @@ export type Config = {
   connections: { title: string; dsn: string }[]
   connectionsReadOnly: boolean
   readOnly: boolean
-  version: { tag: string; sha: string }
+  version: { tag?: string; sha?: string; short_sha?: string; ref_name?: string }
   latest: string
 }
 

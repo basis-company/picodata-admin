@@ -64,9 +64,9 @@ export function SqlView() {
       <div className="min-h-0 flex-1 overflow-auto p-4">
         {error && <ErrorAlert message={error} />}
         {!error && result && result.columns.length > 0 && (
-          <div className="rounded-md border">
+          <div className="panel overflow-hidden">
             <Table>
-              <TableHeader>
+              <TableHeader className="sticky top-0 z-10 bg-muted">
                 <TableRow>
                   {result.columns.map((c) => (
                     <TableHead
@@ -84,7 +84,7 @@ export function SqlView() {
                     {result.columns.map((c) => (
                       <TableCell key={c} className="px-2 py-1">
                         {row[c] === null ? (
-                          <span className="data-cell italic text-muted-foreground">NULL</span>
+                          <span className="data-cell italic text-muted-foreground">—</span>
                         ) : (
                           <span className="data-cell">{row[c]}</span>
                         )}

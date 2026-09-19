@@ -3,11 +3,16 @@ services:
     restart: always
     build:
       context: .
+      args:
+        CI_COMMIT_SHA: ${CI_COMMIT_SHA:-unknown}
+        CI_COMMIT_SHORT_SHA: ${CI_COMMIT_SHORT_SHA:-unknown}
+        CI_COMMIT_REF_NAME: ${CI_COMMIT_REF_NAME:-main}
+        CI_COMMIT_TAG: ${CI_COMMIT_TAG:-unknown}
     ports:
       - "8888:80"
     volumes:
       - ./php:/var/www/html/php
-      - ./public/assets:/var/www/html/public/assets
+      - ./public:/var/www/html/public
     environment:
       - PICODATA_CONNECTIONS=postgres://admin:T0psecret@picodata-1-1:5432
     depends_on:
