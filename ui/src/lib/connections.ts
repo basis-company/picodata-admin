@@ -25,15 +25,6 @@ export function saveSaved(list: SavedConnection[]) {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(list))
 }
 
-const AUTO_CONNECT_OFF_KEY = 'picodata-admin.autoConnectOff'
-
-export function autoConnectDisabled(): boolean {
-  return localStorage.getItem(AUTO_CONNECT_OFF_KEY) !== null
-}
-
-export function disableAutoConnect() {
-  localStorage.setItem(AUTO_CONNECT_OFF_KEY, '1')
-}
 
 export type DsnParts = {
   host: string

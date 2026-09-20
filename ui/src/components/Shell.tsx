@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -37,11 +37,14 @@ export function Shell({
   const readOnly = !!config?.readOnly
   const tablesQ = useAsync(() => api<TableEntry[]>('GET', '/tables'), [])
   const [search, setSearch] = useState('')
-  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ system: true })
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({})
   const [newTableOpen, setNewTableOpen] = useState(false)
   const searchRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
+  useEffect(() => {
+    searchRef.current?.focus()
+  }, [])
   const rows = () => [...(listRef.current?.querySelectorAll<HTMLButtonElement>('button[data-table]') ?? [])]
 
   const focusRow = (el: HTMLElement | null, dir: 1 | -1) => {
@@ -107,17 +110,18 @@ export function Shell({
   return (
     <div className="flex h-full min-h-0">
       <aside className="flex w-60 shrink-0 flex-col border-r bg-card">
-        <button
-          className={cn(
-            'flex h-[52px] w-full items-center gap-2 border-b px-[18px] text-left font-medium hover:bg-accent',
-            view.kind === 'info' && 'bg-accent',
-          )}
-          title={conn.dsn}
-          onClick={() => onView({ kind: 'info' })}
-        >
-          <DatabaseIcon className="size-4 shrink-0 text-muted-foreground" />
-          <span className="translate-y-px truncate">{conn.title}</span>
-        </button>
+        <div className="flex h-[52px] items-center border-b px-2">
+          <Button
+            size="sm"
+            variant="ghost"
+            className={cn('h-8 w-full justify-start', view.kind === 'info' && 'bg-accent')}
+            title={conn.dsn}
+            onClick={() => onView({ kind: 'info' })}
+          >
+            <DatabaseIcon />
+            <span className="translate-y-px truncate">{conn.title}</span>
+          </Button>
+        </div>
         <div className="flex flex-col gap-1 p-2">
           <Button
             size="sm"
@@ -146,8 +150,10 @@ export function Shell({
                   first.focus()
                   first.scrollIntoView({ block: 'nearest' })
                 }
-              }
-            }}
+              } else if (e.key === 'Enter') {
+                e.preventDefault()
+                rows()[0]?.click()
+              }}}
           />
         </div>
         <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
@@ -186,7 +192,7 @@ export function Shell({
           )}
         </div>
         <div className="border-t p-2">
-          <Button size="sm" variant="outline" className="w-full" onClick={onDisconnect}>
+          <Button size="sm" variant="ghost" className="w-full justify-start" onClick={onDisconnect}>
             <UnplugIcon /> Disconnect
           </Button>
         </div>
