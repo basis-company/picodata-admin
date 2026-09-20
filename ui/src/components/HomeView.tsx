@@ -96,7 +96,12 @@ export function HomeView({
       ) : (
         <div className="panel divide-y divide-border">
           {rows.map((c) => (
-            <div key={c.id} className="flex items-center gap-3 px-3 py-2">
+            <div
+              key={c.id}
+              className="flex cursor-pointer items-center gap-3 px-3 py-2 hover:bg-accent"
+              onClick={() => onConnect(c)}
+              title={`Connect to ${c.title}`}
+            >
               <DatabaseIcon className="size-4 shrink-0 text-muted-foreground" />
               <div className="min-w-0 flex-1">
                 <div className="truncate font-medium">{c.title}</div>
@@ -112,7 +117,10 @@ export function HomeView({
                     size="icon-sm"
                     variant="ghost"
                     title="Edit connection"
-                    onClick={() => setEditing({ id: c.id, title: c.title, dsn: c.dsn })}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      setEditing({ id: c.id, title: c.title, dsn: c.dsn })
+                    }}
                   >
                     <PencilIcon />
                   </Button>
@@ -121,7 +129,10 @@ export function HomeView({
                     variant="ghost"
                     title="Delete connection"
                     className="text-muted-foreground hover:text-destructive"
-                    onClick={() => remove(c.id)}
+                    onClick={(e) => {
+                      e.stopPropagation()
+                      remove(c.id)
+                    }}
                   >
                     <Trash2Icon />
                   </Button>

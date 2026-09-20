@@ -23,7 +23,7 @@ import { ErrorAlert } from '@/components/ErrorAlert'
 import { api } from '@/lib/api'
 import { errMessage } from '@/lib/hooks'
 
-const COLUMN_TYPES = [
+export const COLUMN_TYPES = [
   'INTEGER',
   'DOUBLE',
   'TEXT',

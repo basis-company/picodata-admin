@@ -53,7 +53,7 @@ already simplified to `"Online"` server-side.
 }
 ```
 types: INTEGER | DOUBLE | TEXT | BOOLEAN | DATETIME | UUID | DECIMAL | JSON.
-using: TREE | HASH. `global: true` ⇒ `distributed: []`.
+using: TREE (picodata supports only TREE). `global: true` ⇒ `distributed: []`.
 → `{"sql": ["CREATE TABLE ...", "CREATE INDEX ..."]}`
 
 ### GET /api/tables/{name}
@@ -89,6 +89,10 @@ body `{"key": {"id": "1"}}` → `{"affected": 1}`
 `{"name": null, "columns": ["username"], "unique": false, "using": "TREE"}` → `{"ok": true}`
 
 ### DELETE /api/indexes/{name} → `{"ok": true}`
+
+### POST /api/tables/{name}/columns
+`{"name": "note", "type": "TEXT", "nullable": true}` → `{"sql": "ALTER TABLE ... ADD COLUMN ..."}`
+Existing rows get NULL in the new column; `nullable: false` fails on non-empty tables (picodata).
 
 ### POST /api/sql
 body `{"query": "SELECT ..."}` (single statement)

@@ -38,7 +38,6 @@ import { errMessage, useAsync } from '@/lib/hooks'
 import type { Affected, Cell, RowsPage, SpaceInfo } from '@/types'
 
 const PAGE_SIZES = ['25', '50', '100', '250']
-
 export function DataTab({
   space,
   readOnly,
@@ -76,15 +75,21 @@ export function DataTab({
   return (
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-2 px-4 py-2">
-        {!readOnly && (
-          <Button size="sm" variant="outline" onClick={() => setAddOpen(true)}>
-            <PlusIcon /> Add row
-          </Button>
-        )}
+        <span className="font-medium">{space.name}</span>
         {q.error && (
           <div className="min-w-0 flex-1">
             <ErrorAlert message={q.error} onRetry={q.reload} />
           </div>
+        )}
+        {!readOnly && (
+          <Button
+            size="sm"
+            variant="outline"
+            className={q.error ? '' : 'ml-auto'}
+            onClick={() => setAddOpen(true)}
+          >
+            <PlusIcon /> Add row
+          </Button>
         )}
       </div>
       <div className="min-h-0 flex-1 overflow-auto p-4">

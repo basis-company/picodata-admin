@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { CheckIcon, PlusIcon, Trash2Icon } from 'lucide-react'
+import { CheckIcon, PlusIcon, RefreshCwIcon, Trash2Icon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
 import {
@@ -13,6 +13,14 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { Switch } from '@/components/ui/switch'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select'
+import { COLUMN_TYPES } from '@/components/NewTableDialog'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { StickyHead, Th } from '@/components/tableBits'
 import { ConfirmTypeNameDialog } from '@/components/ConfirmTypeNameDialog'
@@ -33,9 +41,11 @@ export function SchemaTab({
   onDropped: () => void
 }) {
   const [indexOpen, setIndexOpen] = useState(false)
+  const [columnOpen, setColumnOpen] = useState(false)
   const [truncateOpen, setTruncateOpen] = useState(false)
   const [dropOpen, setDropOpen] = useState(false)
   const [error, setError] = useState<string | null>(null)
+
 
   const dropIndex = async (index: string) => {
     try {
@@ -48,10 +58,21 @@ export function SchemaTab({
   }
 
   return (
-    <div className="w-full space-y-6 p-4">
+    <div className="w-full">
+      <div className="flex items-center gap-2 px-4 py-2">
+        <span className="font-medium">{space.name}</span>
+        <Button size="sm" variant="ghost" className="ml-auto" onClick={onChanged}>
+          <RefreshCwIcon /> Refresh
+        </Button>
+        {!readOnly && (
+          <Button size="sm" variant="outline" onClick={() => setColumnOpen(true)}>
+            <PlusIcon /> Add column
+          </Button>
+        )}
+      </div>
+      <div className="space-y-6 px-4 pb-4 pt-4">
       {error && <ErrorAlert message={error} />}
       <section className="space-y-2">
-        <h3 className="text-xs font-medium text-muted-foreground">Columns</h3>
         <div className="panel overflow-hidden">
           <Table>
             <StickyHead>
@@ -84,6 +105,17 @@ export function SchemaTab({
           </Table>
         </div>
       </section>
+      {columnOpen && (
+        <AddColumnDialog
+          space={space}
+          open
+          onOpenChange={(o) => !o && setColumnOpen(false)}
+          onDone={() => {
+            setError(null)
+            onChanged()
+          }}
+        />
+      )}
 
       <section className="space-y-2">
         <div className="flex items-center justify-between">
@@ -160,6 +192,7 @@ export function SchemaTab({
           </div>
         </section>
       )}
+      </div>
 
       <AddIndexDialog
         space={space}
@@ -301,6 +334,104 @@ function AddIndexDialog({
           </Button>
           <Button size="sm" disabled={busy} onClick={submit}>
             {busy ? 'Creating…' : 'Create index'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  )
+}
+
+function AddColumnDialog({
+  space,
+  open,
+  onOpenChange,
+  onDone,
+}: {
+  space: SpaceInfo
+  open: boolean
+  onOpenChange: (open: boolean) => void
+  onDone: () => void
+}) {
+  const [name, setName] = useState('')
+  const [type, setType] = useState<string>('TEXT')
+  const [nullable, setNullable] = useState(true)
+  const [error, setError] = useState<string | null>(null)
+  const [busy, setBusy] = useState(false)
+
+  useEffect(() => {
+    if (open) {
+      setName('')
+      setType('TEXT')
+      setNullable(true)
+      setError(null)
+      setBusy(false)
+    }
+  }, [open])
+
+  const submit = async () => {
+    setBusy(true)
+    setError(null)
+    try {
+      await api<Ok>('POST', `/tables/${encodeURIComponent(space.name)}/columns`, {
+        body: { name: name.trim(), type, nullable },
+      })
+      onDone()
+      onOpenChange(false)
+    } catch (e) {
+      setError(errMessage(e))
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-sm">
+        <DialogHeader>
+          <DialogTitle>Add column to {space.name}</DialogTitle>
+          <DialogDescription>
+            Existing rows get NULL in the new column. NOT NULL fails on non-empty tables.
+          </DialogDescription>
+        </DialogHeader>
+        {error && <ErrorAlert message={error} />}
+        <div className="grid grid-cols-2 gap-3">
+          <div className="col-span-2 grid gap-1.5">
+            <Label htmlFor="column-name">Name</Label>
+            <Input
+              id="column-name"
+              className="h-8"
+              placeholder="columnName"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              autoFocus
+            />
+          </div>
+          <div className="grid gap-1.5">
+            <Label>Type</Label>
+            <Select value={type} onValueChange={setType}>
+              <SelectTrigger className="h-8 w-full">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {COLUMN_TYPES.map((t) => (
+                  <SelectItem key={t} value={t}>
+                    {t}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="flex items-center gap-2 pt-5">
+            <Switch id="column-nullable" checked={nullable} onCheckedChange={setNullable} />
+            <Label htmlFor="column-nullable">Nullable</Label>
+          </div>
+        </div>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>
+            Cancel
+          </Button>
+          <Button size="sm" disabled={busy || !name.trim()} onClick={submit}>
+            {busy ? 'Adding…' : 'Add column'}
           </Button>
         </DialogFooter>
       </DialogContent>

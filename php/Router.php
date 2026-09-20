@@ -30,6 +30,7 @@ final class Router
             self::is($segments, 'tables', null, 'rows') && $method === 'PATCH' => self::table(self::mutation(new Job\Row\Update()), $segments[1], $body),
             self::is($segments, 'tables', null, 'rows') && $method === 'DELETE' => self::table(self::mutation(new Job\Row\Remove()), $segments[1], $body),
             self::is($segments, 'tables', null, 'indexes') && $method === 'POST' => self::table(self::mutation(new Job\Space\Index\Add()), $segments[1], $body),
+            self::is($segments, 'tables', null, 'columns') && $method === 'POST' => self::table(self::mutation(new Job\Space\Column\Add()), $segments[1], $body),
             self::is($segments, 'indexes', null) && $method === 'DELETE' => self::with(self::mutation(new Job\Space\Index\Remove()), ['name' => $segments[1]]),
             default => throw new ApiException(404, "No such route: $method /api/$route"),
         };

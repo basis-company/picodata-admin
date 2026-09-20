@@ -36,17 +36,23 @@ export function Shell({
   const readOnly = !!config?.readOnly
   const tablesQ = useAsync(() => api<TableEntry[]>('GET', '/tables'), [])
   const [search, setSearch] = useState('')
-  const [systemOpen, setSystemOpen] = useState(false)
+  const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ system: true })
   const [newTableOpen, setNewTableOpen] = useState(false)
 
   const needle = search.trim().toLowerCase()
   const tables = tablesQ.data ?? []
-  const isSystem = (t: TableEntry) => t.name.startsWith('_pico_')
   const matches = (t: TableEntry) => !needle || t.name.toLowerCase().includes(needle)
-  const userTables = tables.filter((t) => !isSystem(t) && matches(t))
-  const systemTables = tables.filter((t) => isSystem(t) && matches(t))
   const activeName = view.kind === 'table' ? view.name : null
-  const systemExpanded = systemOpen || !!needle
+
+  // tier null means the system tier (_pico_* spaces)
+  const byTier: Record<string, TableEntry[]> = {}
+  const systemTables: TableEntry[] = []
+  for (const t of tables) {
+    if (!matches(t)) continue
+    if (t.tier === null) systemTables.push(t)
+    else (byTier[t.tier] ??= []).push(t)
+  }
+  const tiers = Object.keys(byTier).sort()
 
   const tableRow = (t: TableEntry) => (
     <button
@@ -111,22 +117,37 @@ export function Shell({
               {tablesQ.loading && !tablesQ.data && (
                 <div className="px-2 py-1 text-muted-foreground">Loading tables…</div>
               )}
-              {userTables.map(tableRow)}
-              {systemTables.length > 0 && (
-                <>
+              {tiers.map((tier) => (
+                <div key={tier}>
                   <button
-                    onClick={() => setSystemOpen((o) => !o)}
+                    onClick={() => setCollapsed((c) => ({ ...c, [tier]: !c[tier] }))}
                     className="mt-1 flex w-full items-center gap-1 rounded px-2 py-1 text-left text-muted-foreground hover:text-foreground"
                   >
-                    {systemExpanded ? (
+                    {!collapsed[tier] || needle ? (
+                      <ChevronDownIcon className="size-3" />
+                    ) : (
+                      <ChevronRightIcon className="size-3" />
+                    )}
+                    {tier} ({byTier[tier].length})
+                  </button>
+                  {(!collapsed[tier] || needle) && byTier[tier].map(tableRow)}
+                </div>
+              ))}
+              {systemTables.length > 0 && (
+                <div>
+                  <button
+                    onClick={() => setCollapsed((c) => ({ ...c, system: !c.system }))}
+                    className="mt-1 flex w-full items-center gap-1 rounded px-2 py-1 text-left text-muted-foreground hover:text-foreground"
+                  >
+                    {!collapsed.system || needle ? (
                       <ChevronDownIcon className="size-3" />
                     ) : (
                       <ChevronRightIcon className="size-3" />
                     )}
                     System ({systemTables.length})
                   </button>
-                  {systemExpanded && systemTables.map(tableRow)}
-                </>
+                  {(!collapsed.system || needle) && systemTables.map(tableRow)}
+                </div>
               )}
             </div>
           )}
