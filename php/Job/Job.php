@@ -48,14 +48,40 @@ abstract class Job
         }
     }
 
+    // PostgreSQL reserved words: bare in SQL, they break the parser unless quoted
+    private const RESERVED = [
+        'all', 'analyse', 'analyze', 'and', 'any', 'array', 'as', 'asc',
+        'asymmetric', 'both', 'case', 'cast', 'check', 'collate', 'collation',
+        'column', 'constraint', 'create', 'current_catalog', 'current_date',
+        'current_role', 'current_schema', 'current_time', 'current_timestamp',
+        'current_user', 'default', 'deferrable', 'desc', 'distinct', 'do',
+        'else', 'end', 'except', 'false', 'fetch', 'filter', 'for', 'foreign',
+        'from', 'full', 'grant', 'group', 'having', 'in', 'initially',
+        'intersect', 'into', 'lateral', 'leading', 'limit', 'localtime',
+        'localtimestamp', 'null', 'nullif', 'offset', 'on', 'only', 'or',
+        'order', 'placing', 'primary', 'references', 'returning', 'select',
+        'session_user', 'some', 'symmetric', 'system_user', 'table', 'then',
+        'to', 'trailing', 'true', 'union', 'unique', 'user', 'using',
+        'variadic', 'when', 'where', 'window', 'with',
+    ];
+
     public static function quote(string $name): string
     {
-        return \Basis\Picodata\Quoter::identifier(self::identifier($name));
+        $name = self::identifier($name);
+
+        if (preg_match('/^[a-z_][a-z0-9_]*$/', $name) === 1
+            && !\in_array($name, self::RESERVED, true)) {
+            return $name;
+        }
+
+        return '"' . str_replace('"', '""', $name) . '"';
     }
 
     public static function identifier(string $name): string
     {
-        if (!preg_match('/^[a-z_][a-z0-9_]*$/', $name)) {
+        // PostgreSQL unquoted identifier charset; mixed case names are
+        // passed through to Quoter::identifier(), which double-quotes them.
+        if (!preg_match('/^[A-Za-z_][A-Za-z0-9_$]*$/', $name)) {
             throw new Exception("Invalid identifier: $name");
         }
 

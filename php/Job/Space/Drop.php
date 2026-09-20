@@ -10,7 +10,7 @@ class Drop extends Job
 
     public function run(): array
     {
-        $this->db()->schema()->drop(Job::identifier($this->table));
+        $this->db()->statement('DROP TABLE IF EXISTS ' . Job::quote(Job::identifier($this->table)));
 
         return ['ok' => true];
     }

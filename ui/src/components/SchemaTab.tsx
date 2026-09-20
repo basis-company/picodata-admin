@@ -12,13 +12,6 @@ import {
 } from '@/components/ui/dialog'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
 import { Switch } from '@/components/ui/switch'
 import { Table, TableBody, TableCell, TableRow } from '@/components/ui/table'
 import { StickyHead, Th } from '@/components/tableBits'
@@ -214,7 +207,7 @@ function AddIndexDialog({
   const [name, setName] = useState('')
   const [columns, setColumns] = useState<string[]>([])
   const [unique, setUnique] = useState(false)
-  const [using, setUsing] = useState('TREE')
+  const using = 'TREE'
   const [error, setError] = useState<string | null>(null)
   const [busy, setBusy] = useState(false)
 
@@ -223,7 +216,6 @@ function AddIndexDialog({
       setName('')
       setColumns([])
       setUnique(false)
-      setUsing('TREE')
       setError(null)
       setBusy(false)
     }
@@ -273,15 +265,9 @@ function AddIndexDialog({
           </div>
           <div className="grid gap-1.5">
             <Label>Using</Label>
-            <Select value={using} onValueChange={setUsing}>
-              <SelectTrigger className="h-8">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="TREE">TREE</SelectItem>
-                <SelectItem value="HASH">HASH</SelectItem>
-              </SelectContent>
-            </Select>
+            <div className="flex h-8 items-center rounded-md border px-2 text-muted-foreground">
+              TREE
+            </div>
           </div>
           <div className="flex items-center gap-2 pt-5">
             <Switch id="index-unique" checked={unique} onCheckedChange={setUnique} />

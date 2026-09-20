@@ -10,7 +10,7 @@ class Remove extends Job
 
     public function run(): array
     {
-        $this->db()->schema()->dropIndex(Job::identifier($this->name));
+        $this->db()->statement('DROP INDEX IF EXISTS ' . Job::quote(Job::identifier($this->name)));
 
         return ['ok' => true];
     }

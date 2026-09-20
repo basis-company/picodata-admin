@@ -4,7 +4,6 @@ namespace Job\Space\Index;
 
 use Exception;
 use Job\Job;
-use Basis\Picodata\Schema\Index;
 
 class Add extends Job
 {
@@ -17,19 +16,28 @@ class Add extends Job
     public function run(): array
     {
         $this->using = strtoupper($this->using);
-        if (!in_array($this->using, ['TREE', 'HASH'], true)) {
-            throw new Exception("Invalid index type: {$this->using}");
+        if ($this->using !== 'TREE') {
+            throw new Exception("Invalid index type: {$this->using} (picodata supports TREE only)");
         }
 
-        $t = $this->db()->schema()->load(Job::identifier($this->table));
+        $table = Job::identifier($this->table);
+        $columns = array_map([Job::class, 'identifier'], $this->columns);
 
-        $this->db()->schema()->createIndex($t, new Index(
-            $this->name === null || $this->name === '' ? null : Job::identifier($this->name),
-            array_map([Job::class, 'identifier'], $this->columns),
-            $this->using,
-            $this->unique,
-        ));
+        if ($columns === []) {
+            throw new Exception('Index requires at least one column');
+        }
 
-        return ['ok' => true];
+        $name = $this->name === null || $this->name === ''
+            ? strtolower(str_replace('.', '_', $table) . '_' . implode('_', array_map('strtolower', $columns)) . '_idx')
+            : Job::identifier($this->name);
+
+        $sql = 'CREATE ' . ($this->unique ? 'UNIQUE ' : '') . 'INDEX ' . Job::quote($name)
+            . ' ON ' . Job::quote($table)
+            . ' USING ' . $this->using
+            . ' (' . implode(', ', array_map([Job::class, 'quote'], $columns)) . ')';
+
+        $this->db()->statement($sql);
+
+        return ['sql' => $sql];
     }
 }
