@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
+  DatabaseIcon,
   InfoIcon,
   PlusIcon,
   TerminalIcon,
@@ -72,6 +73,10 @@ export function Shell({
     else (byTier[t.tier] ??= []).push(t)
   }
   const tiers = Object.keys(byTier).sort()
+  const openGroup = (key: string, fallback: boolean) =>
+    !!needle || (key in collapsed ? !collapsed[key] : fallback)
+  const tierOpen = (tier: string) => openGroup(tier, tiers.length <= 1)
+  const systemOpen = openGroup('system', tiers.length === 0)
 
   const tableRow = (t: TableEntry) => (
     <button
@@ -103,8 +108,9 @@ export function Shell({
   return (
     <div className="flex h-full min-h-0">
       <aside className="flex w-60 shrink-0 flex-col border-r bg-card">
-        <div className="truncate border-b px-3 py-2 font-medium" title={conn.dsn}>
-          {conn.title}
+        <div className="flex h-[52px] items-center gap-2 border-b px-[18px] font-medium" title={conn.dsn}>
+          <DatabaseIcon className="size-4 shrink-0 text-muted-foreground" />
+          <span className="translate-y-px truncate">{conn.title}</span>
         </div>
         <div className="flex flex-col gap-1 p-2">
           <Button
@@ -157,33 +163,25 @@ export function Shell({
               {tiers.map((tier) => (
                 <div key={tier}>
                   <button
-                    onClick={() => setCollapsed((c) => ({ ...c, [tier]: !c[tier] }))}
+                    onClick={() => setCollapsed((c) => ({ ...c, [tier]: c[tier] === undefined ? tiers.length <= 1 : !c[tier] }))}
                     className="mt-1 flex w-full items-center gap-1 rounded px-2 py-1 text-left text-muted-foreground hover:text-foreground"
                   >
-                    {!collapsed[tier] || needle ? (
-                      <ChevronDownIcon className="size-3" />
-                    ) : (
-                      <ChevronRightIcon className="size-3" />
-                    )}
+                    {tierOpen(tier) ? <ChevronDownIcon className="size-3" /> : <ChevronRightIcon className="size-3" />}
                     {tier} ({byTier[tier].length})
                   </button>
-                  {(!collapsed[tier] || needle) && byTier[tier].map(tableRow)}
+                  {tierOpen(tier) && byTier[tier].map(tableRow)}
                 </div>
               ))}
               {systemTables.length > 0 && (
                 <div>
                   <button
-                    onClick={() => setCollapsed((c) => ({ ...c, system: !c.system }))}
+                    onClick={() => setCollapsed((c) => ({ ...c, system: c.system === undefined ? tiers.length === 0 : !c.system }))}
                     className="mt-1 flex w-full items-center gap-1 rounded px-2 py-1 text-left text-muted-foreground hover:text-foreground"
                   >
-                    {!collapsed.system || needle ? (
-                      <ChevronDownIcon className="size-3" />
-                    ) : (
-                      <ChevronRightIcon className="size-3" />
-                    )}
+                    {systemOpen ? <ChevronDownIcon className="size-3" /> : <ChevronRightIcon className="size-3" />}
                     System ({systemTables.length})
                   </button>
-                  {(!collapsed.system || needle) && systemTables.map(tableRow)}
+                  {systemOpen && systemTables.map(tableRow)}
                 </div>
               )}
             </div>

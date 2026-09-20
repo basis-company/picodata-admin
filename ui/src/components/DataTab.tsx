@@ -114,12 +114,12 @@ export function DataTab({
           </Button>
         )}
       </div>
-      <div className="min-h-0 flex-1 overflow-auto p-4">
+      <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 pb-4 pt-1">
         {!q.loading && rows.length === 0 && !q.error && (
-          <div className="panel px-4 py-6 text-center text-muted-foreground">No rows.</div>
+          <div className="panel flex-1 px-4 py-6 text-center text-muted-foreground">No rows.</div>
         )}
         {rows.length > 0 && (
-          <div className="panel overflow-hidden">
+          <div className="panel min-h-full shrink-0 overflow-hidden">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-muted">
               <TableRow>

@@ -70,9 +70,9 @@ export function SchemaTab({
           </Button>
         )}
       </div>
-      <div className="space-y-6 px-4 pb-4 pt-4">
+      <div className="space-y-4 px-4 pb-4 pt-1">
       {error && <ErrorAlert message={error} />}
-      <section className="space-y-2">
+      <section className="space-y-3">
         <div className="panel overflow-hidden">
           <Table>
             <StickyHead>
@@ -117,7 +117,7 @@ export function SchemaTab({
         />
       )}
 
-      <section className="space-y-2">
+      <section className="space-y-3">
         <div className="flex items-center justify-between">
           <h3 className="text-xs font-medium text-muted-foreground">Indexes</h3>
           {!readOnly && (

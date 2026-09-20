@@ -45,32 +45,44 @@ export function InfoView() {
 
   if (q.error) {
     return (
-      <div className="p-4">
-        <ErrorAlert message={q.error} onRetry={q.reload} />
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex h-[52px] shrink-0 items-center border-b px-4">
+          <span className="translate-y-px font-medium">Picodata</span>
+        </div>
+        <div className="p-4">
+          <ErrorAlert message={q.error} onRetry={q.reload} />
+        </div>
       </div>
     )
   }
   const info = q.data
   if (!info) {
-    return <div className="p-4 text-muted-foreground">Loading cluster info…</div>
+    return (
+      <div className="flex h-full min-h-0 flex-col">
+        <div className="flex h-[52px] shrink-0 items-center border-b px-4">
+          <span className="translate-y-px font-medium">Picodata</span>
+        </div>
+        <div className="p-4 text-muted-foreground">Loading cluster info…</div>
+      </div>
+    )
   }
 
   return (
-    <div className="w-full space-y-6 p-4">
-      <div className="flex flex-wrap items-center gap-3">
-        <h2 className="text-sm font-medium tabular-nums">
+    <div className="flex h-full min-h-0 flex-col">
+      <div className="flex h-[52px] shrink-0 items-center gap-2 border-b px-4">
+        <span className="translate-y-px font-medium tabular-nums">
           Picodata {info.version ?? 'unknown'}
           {info.tables !== undefined && (
             <span className="text-muted-foreground"> · {info.tables} tables</span>
           )}
-        </h2>
+        </span>
         <Button size="icon-sm" variant="ghost" className="ml-auto" title="Reload" onClick={q.reload}>
           <RefreshCwIcon />
         </Button>
       </div>
-
+      <div className="min-h-0 flex-1 space-y-4 overflow-auto px-4 pb-4 pt-4">
       {info.properties && Object.keys(info.properties).length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h3 className="text-xs font-medium text-muted-foreground">Properties</h3>
           <div className="panel overflow-hidden">
             <Table>
@@ -88,7 +100,7 @@ export function InfoView() {
       )}
 
       {info.instances && info.instances.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h3 className="text-xs font-medium text-muted-foreground">
             Instances ({info.instances.length})
           </h3>
@@ -128,7 +140,7 @@ export function InfoView() {
       )}
 
       {info.tiers && info.tiers.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h3 className="text-xs font-medium text-muted-foreground">Tiers ({info.tiers.length})</h3>
           <div className="panel overflow-hidden">
             <Table>
@@ -170,7 +182,7 @@ export function InfoView() {
       )}
 
       {info.replicasets && info.replicasets.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h3 className="text-xs font-medium text-muted-foreground">
             Replicasets ({info.replicasets.length})
           </h3>
@@ -202,7 +214,7 @@ export function InfoView() {
       )}
 
       {info.buckets && info.buckets.length > 0 && (
-        <section className="space-y-2">
+        <section className="space-y-3">
           <h3 className="text-xs font-medium text-muted-foreground">Buckets</h3>
           <div className="panel overflow-hidden">
             <Table>
@@ -226,6 +238,7 @@ export function InfoView() {
           </div>
         </section>
       )}
+      </div>
     </div>
   )
 }

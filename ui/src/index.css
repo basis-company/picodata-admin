@@ -77,11 +77,6 @@
   }
 }
 
-/* tables scroll within their panel, headers pinned */
-[data-slot="table-container"] {
-  max-height: 60vh;
-  overflow: auto;
-}
 
 .data-cell {
   font-variant-numeric: tabular-nums;

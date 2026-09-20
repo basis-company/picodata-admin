@@ -65,7 +65,8 @@ export function HomeView({
   }
 
   return (
-    <div className="w-full px-6 py-6">
+    <div className="flex min-h-full flex-col justify-center px-6 py-6">
+      <div className="mx-auto w-full max-w-[500px]">
       <div className="mb-4 flex items-baseline justify-between">
         <h1 className="text-sm font-semibold">Picodata Admin</h1>
         {config && config.version.sha && config.version.sha !== 'unknown' && (
@@ -81,7 +82,7 @@ export function HomeView({
           <ErrorAlert message={`Could not load server configuration: ${error}`} onRetry={onReload} />
         </div>
       )}
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-4 flex items-center justify-between">
         <h2 className="text-xs font-medium text-muted-foreground">Connections</h2>
         {!editorHidden && (
           <Button size="sm" variant="outline" onClick={() => setEditing('new')}>
@@ -155,6 +156,7 @@ export function HomeView({
           onSave={upsert}
         />
       )}
+      </div>
     </div>
   )
 }

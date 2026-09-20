@@ -23,7 +23,7 @@ export function TableView({
 
   return (
     <div className="flex h-full min-h-0 flex-col">
-      <div className="flex flex-wrap items-center gap-2 border-b px-4 py-2">
+      <div className="flex h-[52px] items-center gap-2 border-b px-4">
         <Tabs value={tab} onValueChange={setTab}>
           <TabsList className="h-8">
             <TabsTrigger value="data">Data</TabsTrigger>
