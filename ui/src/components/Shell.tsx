@@ -3,7 +3,6 @@ import {
   ChevronDownIcon,
   ChevronRightIcon,
   DatabaseIcon,
-  InfoIcon,
   PlusIcon,
   TerminalIcon,
   UnplugIcon,
@@ -108,19 +107,18 @@ export function Shell({
   return (
     <div className="flex h-full min-h-0">
       <aside className="flex w-60 shrink-0 flex-col border-r bg-card">
-        <div className="flex h-[52px] items-center gap-2 border-b px-[18px] font-medium" title={conn.dsn}>
+        <button
+          className={cn(
+            'flex h-[52px] w-full items-center gap-2 border-b px-[18px] text-left font-medium hover:bg-accent',
+            view.kind === 'info' && 'bg-accent',
+          )}
+          title={conn.dsn}
+          onClick={() => onView({ kind: 'info' })}
+        >
           <DatabaseIcon className="size-4 shrink-0 text-muted-foreground" />
           <span className="translate-y-px truncate">{conn.title}</span>
-        </div>
+        </button>
         <div className="flex flex-col gap-1 p-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            className={cn('justify-start', view.kind === 'info' && 'bg-accent')}
-            onClick={() => onView({ kind: 'info' })}
-          >
-            <InfoIcon /> Info
-          </Button>
           <Button
             size="sm"
             variant="ghost"

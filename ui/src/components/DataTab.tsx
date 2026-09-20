@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import {
   ChevronLeftIcon,
   ChevronRightIcon,
@@ -23,7 +23,6 @@ import {
   SelectContent,
   SelectItem,
   SelectTrigger,
-  SelectValue,
 } from '@/components/ui/select'
 import {
   Table,
@@ -60,6 +59,28 @@ export function DataTab({
     return () => clearTimeout(t)
   }, [search])
   useEffect(() => setOffset(0), [term])
+
+  const scrollRef = useRef<HTMLDivElement>(null)
+  const offsetRef = useRef(offset)
+  offsetRef.current = offset
+  const autoFitDone = useRef(false)
+  const fitHeight = useCallback(() => {
+    const el = scrollRef.current
+    if (!el || offsetRef.current !== 0) return
+    const row = el.querySelector<HTMLElement>('tbody tr')
+    const head = el.querySelector<HTMLElement>('thead')
+    const rowH = row ? row.offsetHeight : 29
+    const headH = head ? head.offsetHeight : 33
+    const n = Math.max(1, Math.floor((el.clientHeight - 22 - headH) / rowH))
+    setLimit(n)
+  }, [])
+  useEffect(() => {
+    const el = scrollRef.current
+    if (!el) return
+    const ro = new ResizeObserver(fitHeight)
+    ro.observe(el)
+    return () => ro.disconnect()
+  }, [fitHeight])
   const rowsPath = `/tables/${encodeURIComponent(space.name)}/rows`
   const q = useAsync(
     () =>
@@ -79,6 +100,21 @@ export function DataTab({
         : space.columns.map((c) => c.name)
   const rangeEnd = total !== null ? Math.min(offset + limit, total) : offset + rows.length
   const hasNext = total !== null ? offset + limit < total : rows.length === limit
+
+  useEffect(() => {
+    if (autoFitDone.current || rows.length === 0) return
+    autoFitDone.current = true
+    fitHeight()
+  }, [rows, fitHeight])
+
+  useEffect(() => {
+    const cont = scrollRef.current?.querySelector('[data-slot=table-container]')
+    if (cont) cont.scrollTop = 0
+  }, [offset])
+
+  useEffect(() => {
+    if (offset === 0 && rows.length > 0) fitHeight()
+  }, [offset, fitHeight, rows])
 
   const changed = () => {
     q.reload()
@@ -114,12 +150,12 @@ export function DataTab({
           </Button>
         )}
       </div>
-      <div className="flex min-h-0 flex-1 flex-col overflow-auto px-4 pb-4 pt-1">
+      <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-1">
         {!q.loading && rows.length === 0 && !q.error && (
           <div className="panel flex-1 px-4 py-6 text-center text-muted-foreground">No rows.</div>
         )}
         {rows.length > 0 && (
-          <div className="panel min-h-full shrink-0 overflow-hidden">
+          <div className="panel h-full overflow-hidden [&_[data-slot=table-container]]:h-full">
           <Table>
             <TableHeader className="sticky top-0 z-10 bg-muted">
               <TableRow>
@@ -157,7 +193,7 @@ export function DataTab({
           </div>
         )}
       </div>
-      <div className="flex items-center gap-2 border-t px-4 py-1.5 text-muted-foreground">
+      <div className="flex h-[49px] items-center gap-2 border-t px-4 text-muted-foreground">
         <span className="tabular-nums">
           {rows.length === 0 ? 'no rows' : `${offset + 1}–${rangeEnd} of ${total === null ? '?' : total.toLocaleString()}`}
         </span>
@@ -170,7 +206,7 @@ export function DataTab({
             }}
           >
             <SelectTrigger size="sm" className="w-[72px]" title="Rows per page">
-              <SelectValue />
+              <span className="truncate tabular-nums">{limit}</span>
             </SelectTrigger>
             <SelectContent>
               {PAGE_SIZES.map((n) => (

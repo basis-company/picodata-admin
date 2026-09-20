@@ -1,4 +1,14 @@
 import { useEffect, useState } from 'react'
+import {
+  autoConnectDisabled,
+  buildDsn,
+  disableAutoConnect,
+  loadSaved,
+  maskDsn,
+  parseDsn,
+  saveSaved,
+  type SavedConnection,
+} from '@/lib/connections'
 import { DatabaseIcon, PencilIcon, PlusIcon, Trash2Icon } from 'lucide-react'
 import { Badge } from '@/components/ui/badge'
 import { Button } from '@/components/ui/button'
@@ -13,14 +23,6 @@ import {
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import { ErrorAlert } from '@/components/ErrorAlert'
-import {
-  buildDsn,
-  loadSaved,
-  maskDsn,
-  parseDsn,
-  saveSaved,
-  type SavedConnection,
-} from '@/lib/connections'
 import type { Config, Connection } from '@/types'
 
 type Row = SavedConnection & { env: boolean }
@@ -50,10 +52,18 @@ export function HomeView({
     ...(editorHidden ? [] : saved.map((c) => ({ ...c, env: false }))),
   ]
 
+  useEffect(() => {
+    if (!config && error === null) return
+    if (rows.length !== 1 || autoConnectDisabled()) return
+    if (editing) return
+    const t = setTimeout(() => onConnect(rows[0]), 800)
+    return () => clearTimeout(t)
+  })
+
   const upsert = (c: SavedConnection) => {
-    const next = saved.some((p) => p.id === c.id)
-      ? saved.map((p) => (p.id === c.id ? c : p))
-      : [...saved, c]
+    const isNew = !saved.some((p) => p.id === c.id)
+    const next = isNew ? [...saved, c] : saved.map((p) => (p.id === c.id ? c : p))
+    if (isNew) disableAutoConnect()
     saveSaved(next)
     setSaved(next)
   }

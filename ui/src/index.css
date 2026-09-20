@@ -84,13 +84,12 @@
 
 /* dense, light controls */
 [data-slot="button"][data-variant="default"] {
-  border: 1px solid var(--color-border);
-  background-color: var(--color-muted);
-  color: var(--color-foreground);
+  background-color: var(--color-primary);
+  color: var(--color-primary-foreground);
   box-shadow: 0 1px 2px rgb(0 0 0 / 0.05);
 }
 [data-slot="button"][data-variant="default"]:hover:not(:disabled) {
-  background-color: var(--color-secondary);
+  background-color: color-mix(in oklab, var(--color-primary) 85%, black);
 }
 [data-slot="dialog-title"] {
   font-size: 13px;
