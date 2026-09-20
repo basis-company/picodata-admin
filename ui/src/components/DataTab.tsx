@@ -3,6 +3,7 @@ import {
   ChevronLeftIcon,
   ChevronRightIcon,
   PlusIcon,
+  SearchIcon,
   Trash2Icon,
   PencilIcon,
 } from 'lucide-react'
@@ -33,6 +34,7 @@ import {
   TableRow,
 } from '@/components/ui/table'
 import { ErrorAlert } from '@/components/ErrorAlert'
+import { highlight, layoutVariants } from '@/components/tableBits'
 import { api } from '@/lib/api'
 import { errMessage, useAsync } from '@/lib/hooks'
 import type { Affected, Cell, RowsPage, SpaceInfo } from '@/types'
@@ -51,10 +53,21 @@ export function DataTab({
   const [limit, setLimit] = useState(50)
   const [addOpen, setAddOpen] = useState(false)
   const [editRow, setEditRow] = useState<Record<string, Cell> | null>(null)
+  const [search, setSearch] = useState('')
+  const [term, setTerm] = useState('')
+  useEffect(() => {
+    const t = setTimeout(() => setTerm(search.trim()), 300)
+    return () => clearTimeout(t)
+  }, [search])
+  useEffect(() => setOffset(0), [term])
   const rowsPath = `/tables/${encodeURIComponent(space.name)}/rows`
   const q = useAsync(
-    () => api<RowsPage>('GET', `${rowsPath}?offset=${offset}&limit=${limit}`),
-    [space.name, offset, limit],
+    () =>
+      api<RowsPage>(
+        'GET',
+        `${rowsPath}?offset=${offset}&limit=${limit}${term ? `&q=${encodeURIComponent(term)}` : ''}`,
+      ),
+    [space.name, offset, limit, term],
   )
   const rows = q.data?.rows ?? []
   const total = q.data?.total ?? null
@@ -76,6 +89,15 @@ export function DataTab({
     <div className="flex h-full min-h-0 flex-col">
       <div className="flex items-center gap-2 px-4 py-2">
         <span className="font-medium">{space.name}</span>
+        <div className="relative ml-2">
+          <SearchIcon className="pointer-events-none absolute left-2 top-1/2 size-3.5 -translate-y-1/2 text-muted-foreground" />
+          <Input
+            className="h-8 w-64 pl-7"
+            placeholder="Filter rows…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+          />
+        </div>
         {q.error && (
           <div className="min-w-0 flex-1">
             <ErrorAlert message={q.error} onRetry={q.reload} />
@@ -117,7 +139,7 @@ export function DataTab({
                       {row[c] === null ? (
                         <span className="data-cell italic text-muted-foreground">—</span>
                       ) : (
-                        <span className="data-cell">{row[c]}</span>
+                        <span className="data-cell">{highlight(String(row[c]), layoutVariants(term))}</span>
                       )}
                     </TableCell>
                   ))}

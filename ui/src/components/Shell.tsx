@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import {
   ChevronDownIcon,
   ChevronRightIcon,
@@ -15,6 +15,7 @@ import { InfoView } from '@/components/InfoView'
 import { NewTableDialog } from '@/components/NewTableDialog'
 import { SqlView } from '@/components/SqlView'
 import { TableView } from '@/components/TableView'
+import { highlight, layoutVariants } from '@/components/tableBits'
 import { api } from '@/lib/api'
 import { useAsync } from '@/lib/hooks'
 import { cn } from '@/lib/utils'
@@ -38,10 +39,28 @@ export function Shell({
   const [search, setSearch] = useState('')
   const [collapsed, setCollapsed] = useState<Record<string, boolean>>({ system: true })
   const [newTableOpen, setNewTableOpen] = useState(false)
+  const searchRef = useRef<HTMLInputElement>(null)
+  const listRef = useRef<HTMLDivElement>(null)
+
+  const rows = () => [...(listRef.current?.querySelectorAll<HTMLButtonElement>('button[data-table]') ?? [])]
+
+  const focusRow = (el: HTMLElement | null, dir: 1 | -1) => {
+    const all = rows()
+    const next = all[(el ? all.indexOf(el as HTMLButtonElement) : -dir) + dir]
+    if (next) {
+      next.focus()
+      next.scrollIntoView({ block: 'nearest' })
+    } else if (dir === -1) {
+      searchRef.current?.focus()
+    }
+  }
 
   const needle = search.trim().toLowerCase()
+  const variants = layoutVariants(search.trim())
   const tables = tablesQ.data ?? []
-  const matches = (t: TableEntry) => !needle || t.name.toLowerCase().includes(needle)
+  const matches = (t: TableEntry) =>
+    variants.length === 0 ||
+    variants.some((v) => t.name.toLowerCase().includes(v.toLowerCase()))
   const activeName = view.kind === 'table' ? view.name : null
 
   // tier null means the system tier (_pico_* spaces)
@@ -63,8 +82,15 @@ export function Shell({
         activeName === t.name && 'bg-accent font-medium',
       )}
       title={t.name}
+      data-table={t.name}
+      onKeyDown={(e) => {
+        if (e.key === 'ArrowDown' || e.key === 'ArrowUp') {
+          e.preventDefault()
+          focusRow(e.currentTarget, e.key === 'ArrowDown' ? 1 : -1)
+        }
+      }}
     >
-      <span className="truncate">{t.name}</span>
+      <span className="truncate">{highlight(t.name, variants)}</span>
       <Badge
         variant="outline"
         className="shrink-0 px-1 py-0 text-[10px] font-normal text-muted-foreground"
@@ -103,13 +129,24 @@ export function Shell({
             </Button>
           )}
           <Input
+            ref={searchRef}
             className="mt-1 h-7"
             placeholder="Search tables…"
             value={search}
             onChange={(e) => setSearch(e.target.value)}
+            onKeyDown={(e) => {
+              if (e.key === 'ArrowDown') {
+                e.preventDefault()
+                const first = rows()[0]
+                if (first) {
+                  first.focus()
+                  first.scrollIntoView({ block: 'nearest' })
+                }
+              }
+            }}
           />
         </div>
-        <div className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
+        <div ref={listRef} className="min-h-0 flex-1 overflow-y-auto px-2 pb-2">
           {tablesQ.error && !tablesQ.data ? (
             <ErrorAlert message={tablesQ.error} onRetry={tablesQ.reload} />
           ) : (

@@ -26,7 +26,7 @@ if ($path === '/api' || str_starts_with($path, '/api/')) {
 
     http_response_code($status);
     header('Content-Type: application/json');
-    echo json_encode($data);
+    echo json_encode($data, JSON_INVALID_UTF8_SUBSTITUTE);
 
     exit;
 }

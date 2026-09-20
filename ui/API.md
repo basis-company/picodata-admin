@@ -71,9 +71,13 @@ using: TREE (picodata supports only TREE). `global: true` ⇒ `distributed: []`.
 ### DELETE /api/tables/{name} → `{"ok": true}`
 ### POST /api/tables/{name}/truncate → `{"affected": N}`
 
-### GET /api/tables/{name}/rows?offset=0&limit=50
+### GET /api/tables/{name}/rows?offset=0&limit=50&q=term
 `{"rows": [{"id": "1", "name": "bob"}], "columns": ["id","name"], "total": 137, "order": ["id"]}`
 All cell values arrive as strings or `null` (pg text protocol). `total` may be null.
+`q` = full-text filter: case-insensitive `ILIKE %term%` over `CAST(col AS TEXT)` of every column
+(`%`/`_`/`\` escaped). Wrong-keyboard-layout tolerant: `шеу` also matches `ite` (ЙЦУКЕН⇄QWERTY swap,
+both directions); the client highlights the matching substring of every variant.
+Cells with invalid UTF-8 arrive with bad bytes replaced by U+FFFD (server json flag).
 
 ### POST /api/tables/{name}/rows
 body `{"values": {"id": 1, "name": "bob"}}` → `{"affected": 1}`

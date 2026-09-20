@@ -94,6 +94,7 @@ final class Router
             'table' => urldecode($name),
             'offset' => (int) ($_GET['offset'] ?? 0),
             'limit' => (int) ($_GET['limit'] ?? 50),
+            'search' => (string) ($_GET['q'] ?? ''),
         ]);
     }
 
