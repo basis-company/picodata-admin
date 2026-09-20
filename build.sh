@@ -14,7 +14,7 @@ CI_COMMIT_SHA=$(git rev-parse --verify HEAD)
 CI_COMMIT_SHORT_SHA=$(git rev-parse --verify --short HEAD)
 
 # --- Docker Image Tagging ---
-IMAGE_NAME="basiscompany/picodata-admin"
+IMAGE_NAME="ghcr.io/basis-company/picodata-admin"
 # Use git tag if on a tagged commit, otherwise use short SHA
 IMAGE_TAG=$(git describe --tags --exact-match 2>/dev/null || echo "$CI_COMMIT_SHORT_SHA")
 

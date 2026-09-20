@@ -6,8 +6,10 @@ PHP 8.5 backend over [picodata.php](https://github.com/basis-company/picodata.ph
 Feel free to contribute any way.
 
 ## Running existing build
-Run `docker run -p 8000:80 basiscompany/picodata-admin`
+Run `docker run -p 8000:80 ghcr.io/basis-company/picodata-admin`
 Open [http://localhost:8000](http://localhost:8000) in your browser.
+
+Published images: `latest` and version tags from GitHub releases, `edge` from the `master` branch.
 
 ## Configure using env
 Application can be configured via environment:
