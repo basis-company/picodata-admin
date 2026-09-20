@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import {
   buildDsn,
+  newId,
   loadSaved,
   maskDsn,
   parseDsn,
@@ -107,37 +108,41 @@ export function HomeView({
                 <div className="truncate font-medium">{c.title}</div>
                 <div className="data-cell truncate text-muted-foreground">{maskDsn(c.dsn)}</div>
               </div>
-              {c.env && <Badge variant="secondary">env</Badge>}
-              <Button size="sm" onClick={() => onConnect(c)}>
+              {/* one fixed right-side slot: env badge or edit/delete occupy the same place */}
+              <div className="flex w-14 shrink-0 items-center justify-end">
+                {c.env ? (
+                  <Badge variant="secondary">env</Badge>
+                ) : !editorHidden ? (
+                  <>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      title="Edit connection"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        setEditing({ id: c.id, title: c.title, dsn: c.dsn })
+                      }}
+                    >
+                      <PencilIcon />
+                    </Button>
+                    <Button
+                      size="icon-sm"
+                      variant="ghost"
+                      title="Delete connection"
+                      className="text-muted-foreground hover:text-destructive"
+                      onClick={(e) => {
+                        e.stopPropagation()
+                        remove(c.id)
+                      }}
+                    >
+                      <Trash2Icon />
+                    </Button>
+                  </>
+                ) : null}
+              </div>
+              <Button size="sm" className="shrink-0" onClick={() => onConnect(c)}>
                 Connect
               </Button>
-              {!c.env && !editorHidden && (
-                <>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    title="Edit connection"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      setEditing({ id: c.id, title: c.title, dsn: c.dsn })
-                    }}
-                  >
-                    <PencilIcon />
-                  </Button>
-                  <Button
-                    size="icon-sm"
-                    variant="ghost"
-                    title="Delete connection"
-                    className="text-muted-foreground hover:text-destructive"
-                    onClick={(e) => {
-                      e.stopPropagation()
-                      remove(c.id)
-                    }}
-                  >
-                    <Trash2Icon />
-                  </Button>
-                </>
-              )}
             </div>
           ))}
         </div>
@@ -206,7 +211,7 @@ function ConnectionDialog({
     const dsn = buildDsn(parts)
     const fallback = `${parts.host}${parts.port ? ':' + parts.port : ''}${parts.dbname ? '/' + parts.dbname : ''}`
     onSave({
-      id: initial ? initial.id : crypto.randomUUID(),
+      id: initial ? initial.id : newId(),
       title: title.trim() || fallback,
       dsn,
     })

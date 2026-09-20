@@ -2,6 +2,13 @@ export type SavedConnection = { id: string; title: string; dsn: string }
 
 const STORAGE_KEY = 'picodata-admin.connections'
 
+// crypto.randomUUID only exists in secure contexts; http://<ip>:<port> is not one
+export function newId(): string {
+  return typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function'
+    ? crypto.randomUUID()
+    : `c-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 10)}`
+}
+
 export function loadSaved(): SavedConnection[] {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -12,7 +19,7 @@ export function loadSaved(): SavedConnection[] {
       .filter((c): c is Record<string, unknown> => typeof c === 'object' && c !== null)
       .filter((c) => typeof c.dsn === 'string' && typeof c.title === 'string')
       .map((c) => ({
-        id: typeof c.id === 'string' && c.id ? c.id : crypto.randomUUID(),
+        id: typeof c.id === 'string' && c.id ? c.id : newId(),
         title: String(c.title),
         dsn: String(c.dsn),
       }))

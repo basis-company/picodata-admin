@@ -32,6 +32,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table'
+import { Badge } from '@/components/ui/badge'
 import { ErrorAlert } from '@/components/ErrorAlert'
 import { highlight, layoutVariants } from '@/components/tableBits'
 import { api } from '@/lib/api'
@@ -39,6 +40,34 @@ import { errMessage, useAsync } from '@/lib/hooks'
 import type { Affected, Cell, RowsPage, SpaceInfo } from '@/types'
 
 const PAGE_SIZES = ['25', '50', '100', '250']
+
+const CELL_MAX = 32
+
+function sizeLabel(bytes: number) {
+  if (bytes < 1024) return `${bytes} B`
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`
+  return `${(bytes / 1024 / 1024).toFixed(1)} MB`
+}
+
+function CellValue({ v, term }: { v: Cell; term: string }) {
+  if (typeof v === 'string' && v.startsWith('base64:')) {
+    const bytes = Math.floor((v.length - 7) * 0.75)
+    return (
+      <Badge variant="outline" className="font-normal text-muted-foreground">
+        binary · {sizeLabel(bytes)}
+      </Badge>
+    )
+  }
+  const s = String(v)
+  if (s.length <= CELL_MAX) return <span className="data-cell">{highlight(s, layoutVariants(term))}</span>
+  return (
+    <span className="data-cell" title={s}>
+      {highlight(s.slice(0, CELL_MAX), layoutVariants(term))}
+      <span className="text-muted-foreground">…</span>
+    </span>
+  )
+}
+
 export function DataTab({
   space,
   readOnly,
@@ -175,7 +204,7 @@ export function DataTab({
                       {row[c] === null ? (
                         <span className="data-cell italic text-muted-foreground">—</span>
                       ) : (
-                        <span className="data-cell">{highlight(String(row[c]), layoutVariants(term))}</span>
+                        <CellValue v={row[c]} term={term} />
                       )}
                     </TableCell>
                   ))}

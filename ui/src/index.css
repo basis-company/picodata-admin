@@ -82,6 +82,15 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* hand cursor on everything clickable (Tailwind v4 preflight defaults buttons to an arrow) */
+a[href],
+button:not(:disabled),
+[role="tab"],
+[role="combobox"],
+summary {
+  cursor: pointer;
+}
+
 /* dense, light controls */
 [data-slot="button"][data-variant="default"] {
   background-color: var(--color-primary);

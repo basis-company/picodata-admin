@@ -53,6 +53,8 @@ export function Shell({
     if (next) {
       next.focus()
       next.scrollIntoView({ block: 'nearest' })
+      // opening the focused row like a click: arrows double as a live preview
+      next.click()
     } else if (dir === -1) {
       searchRef.current?.focus()
     }
@@ -149,6 +151,7 @@ export function Shell({
                 if (first) {
                   first.focus()
                   first.scrollIntoView({ block: 'nearest' })
+                  first.click()
                 }
               } else if (e.key === 'Enter') {
                 e.preventDefault()

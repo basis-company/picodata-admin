@@ -178,7 +178,7 @@ export function SchemaTab({
       </section>
 
       {!readOnly && (
-        <section className="panel border-destructive/40">
+        <section className="panel mt-6! border-destructive/40">
           <div className="border-b bg-destructive/5 px-3 py-1.5 text-xs font-medium text-destructive">
             Danger zone
           </div>
