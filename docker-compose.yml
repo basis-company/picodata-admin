@@ -44,7 +44,7 @@ services:
     volumes:
       - picodata-1-1-data:/var/lib/picodata
     healthcheck:
-      test: ["CMD-SHELL", "echo \"SELECT current_state FROM _pico_instance;\" | picodata admin /var/lib/picodata/admin.sock 2>/dev/null | grep -q Online"]
+      test: ["CMD-SHELL", "echo \"SELECT current_state FROM _pico_instance;\" | picodata admin /var/lib/picodata/admin.sock 2>/dev/null | grep Online > /dev/null"]
       interval: 5s
       timeout: 5s
       retries: 60
