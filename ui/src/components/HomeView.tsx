@@ -95,7 +95,7 @@ export function HomeView({
           No connections. Add one to get started.
         </div>
       ) : (
-        <div className="panel divide-y divide-border">
+        <div className="panel w-full divide-y divide-border">
           {rows.map((c) => (
             <div
               key={c.id}
