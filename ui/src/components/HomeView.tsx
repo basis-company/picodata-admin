@@ -91,7 +91,7 @@ export function HomeView({
         )}
       </div>
       {rows.length === 0 ? (
-        <div className="panel px-3 py-6 text-center text-muted-foreground">
+        <div className="panel w-full px-3 py-6 text-center text-muted-foreground">
           No connections. Add one to get started.
         </div>
       ) : (

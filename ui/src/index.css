@@ -71,9 +71,9 @@
 }
 
 @layer components {
-  /* white rounded panel with thin border and soft shadow */
+  /* white rounded panel with thin border, soft shadow, hugging its content */
   .panel {
-    @apply rounded-xl border border-border bg-card shadow-sm;
+    @apply w-fit max-w-full rounded-xl border border-border bg-card shadow-sm;
   }
 }
 

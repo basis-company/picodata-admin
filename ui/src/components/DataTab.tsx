@@ -181,7 +181,7 @@ export function DataTab({
       </div>
       <div ref={scrollRef} className="flex min-h-0 flex-1 flex-col px-4 pb-4 pt-1">
         {!q.loading && rows.length === 0 && !q.error && (
-          <div className="panel flex-1 px-4 py-6 text-center text-muted-foreground">No rows.</div>
+          <div className="panel w-full flex-1 px-4 py-6 text-center text-muted-foreground">No rows.</div>
         )}
         {rows.length > 0 && (
           <div className="panel h-full overflow-hidden [&_[data-slot=table-container]]:h-full">
