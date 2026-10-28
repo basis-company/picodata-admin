@@ -18,11 +18,18 @@ Application can be configured via environment:
 * PICODATA_CONNECTIONS_READONLY - disable connections editor, only env connections are usable
 * PICODATA_READONLY - disable any database changes (server side enforced)
 * PICODATA_SQL_LIMIT - specifies a limit on the number of rows for SQL SELECT. By default, 500. To remove the limit, set 0.
+* PICODATA_CONNECT_TIMEOUT - seconds to wait for the database connection to open. By default, 10. Set 0 to wait forever.
 
 Connections are stored in the browser localStorage; `PICODATA_CONNECTIONS` seeds
 defaults and, with `PICODATA_CONNECTIONS_READONLY=true`, pins them.
 
 ## Known limitations
+* Connections are opened from the server container, not from the browser. If
+  picodata is published on a host port (e.g. `IP:8000`) and the admin runs in
+  docker on the *same* docker network as the database, connecting by host IP
+  can hang because docker hairpin NAT to published ports is unreliable — the
+  new `connect_timeout` will report it as a timeout. Prefer the container
+  service name (e.g. `picodata-1-1:8000`) or run the admin on the host network.
 * JSON columns can be created and read, but current Picodata pgwire (26.1) has
   no syntax to write map/json values via SQL — writes to a JSON column fail
   with a server error. This is a Picodata limitation, not an admin one.

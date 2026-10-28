@@ -24,7 +24,7 @@ abstract class Job
                 throw new Exception('No connection string given');
             }
 
-            $this->picodata = Picodata::connect(self::normalizeDsn($dsn));
+            $this->picodata = Picodata::connect(self::withConnectTimeout(self::normalizeDsn($dsn)));
         }
 
         return $this->picodata;
@@ -38,6 +38,24 @@ abstract class Job
         }
 
         return $dsn;
+    }
+
+    /**
+     * Fail fast with a readable error instead of hanging until the web server
+     * gives up (docker hairpin NAT to a host-published port silently drops
+     * SYNs when both containers share a network, so a bad route hangs ~2 min).
+     * Set PICODATA_CONNECT_TIMEOUT=0 to restore the libpq default.
+     */
+    public static function withConnectTimeout(string $dsn): string
+    {
+        if (str_contains($dsn, '?')) {
+            return $dsn; // caller already passes libpq options
+        }
+
+        $timeout = getenv('PICODATA_CONNECT_TIMEOUT');
+        $timeout = $timeout === false || $timeout === '' ? 10 : max(0, (int) $timeout);
+
+        return $timeout > 0 ? $dsn . '?connect_timeout=' . $timeout : $dsn;
     }
 
     public static function writable(): void

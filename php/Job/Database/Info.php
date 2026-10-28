@@ -10,6 +10,10 @@ class Info extends Job
     public function run(): array
     {
         $db = $this->db();
+        // open the connection once, outside the tolerated-failure blocks below:
+        // a dead/unreachable server must fail fast as 500, not degrade into an
+        // empty info payload after every query re-waits for the connect timeout
+        $db->query('SELECT 1');
         $info = [];
 
         try {
