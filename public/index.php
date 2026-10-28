@@ -11,6 +11,17 @@ if (php_sapi_name() === 'cli-server' && $path !== '/' && is_file(__DIR__ . $path
     return false;
 }
 
+/**
+ * Error messages may echo the connection string (the pgsql driver reports the
+ * full DSN on connect failure); never leak credentials to the client.
+ */
+function mask_secrets(string $message): string
+{
+    $message = preg_replace('~\b(picodata|postgres(?:ql)?)://[^\s/@]*@~i', '$1://***@', $message) ?? $message;
+
+    return preg_replace('~\bpassword(\s*=\s*)(\'(?:[^\'\\\\]|\\\\.)*\'|"[^"]*"|\S+)~i', 'password${1}***', $message) ?? $message;
+}
+
 if ($path === '/api' || str_starts_with($path, '/api/')) {
     $method = $_SERVER['REQUEST_METHOD'] ?? 'GET';
 
@@ -21,7 +32,7 @@ if ($path === '/api' || str_starts_with($path, '/api/')) {
         if ($status < 400) {
             $status = 500;
         }
-        $data = ['error' => $e->getMessage()];
+        $data = ['error' => mask_secrets($e->getMessage())];
     }
 
     http_response_code($status);
